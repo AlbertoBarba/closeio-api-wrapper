@@ -5,6 +5,7 @@ namespace LooplineSystems\CloseIoApiWrapper\Api;
 use LooplineSystems\CloseIoApiWrapper\CloseIoResponse;
 use LooplineSystems\CloseIoApiWrapper\Library\Api\AbstractApi;
 use LooplineSystems\CloseIoApiWrapper\Library\Exception\InvalidParamException;
+use LooplineSystems\CloseIoApiWrapper\Library\Exception\UrlNotSetException;
 use LooplineSystems\CloseIoApiWrapper\Model\Activity;
 use LooplineSystems\CloseIoApiWrapper\Model\CallActivity;
 use LooplineSystems\CloseIoApiWrapper\Model\EmailActivity;
@@ -108,12 +109,30 @@ class ActivityApi extends AbstractApi
     }
 
     /**
-     * @param array $filters
+     * @param null|int $limit
+     * @param null|int $skip
+     * @param null|array|string $query
      *
      * @return CallActivity[]
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
-    public function getCalls(array $filters)
+    public function getCalls($limit = null, $skip = null, $query = null)
     {
+        $filters = [];
+        if (!empty($limit)) {
+            $filters['_limit'] = $limit;
+        }
+
+        if (!empty($skip)) {
+            $filters['_skip'] = $skip;
+        }
+
+        if (!empty($query)) {
+            $filters['query'] = $query;
+        }
+
         $apiRequest = $this->prepareRequest('get-calls', null, [], $filters);
 
         $result = $this->triggerGet($apiRequest);
@@ -245,11 +264,8 @@ class ActivityApi extends AbstractApi
      * @param string $id
      *
      * @return bool
-     *
-     * @throws BadApiRequestException
      * @throws InvalidParamException
-     * @throws UrlNotSetException
-     * @throws ResourceNotFoundException
+     * @throws \LooplineSystems\CloseIoApiWrapper\Library\Exception\UrlNotSetException
      */
     public function deleteSms($id)
     {

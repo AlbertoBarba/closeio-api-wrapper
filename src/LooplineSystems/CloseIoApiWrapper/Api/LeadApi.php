@@ -15,6 +15,7 @@ use LooplineSystems\CloseIoApiWrapper\Library\Curl\Curl;
 use LooplineSystems\CloseIoApiWrapper\Library\Exception\InvalidNewLeadPropertyException;
 use LooplineSystems\CloseIoApiWrapper\Library\Exception\InvalidParamException;
 use LooplineSystems\CloseIoApiWrapper\Library\Exception\ResourceNotFoundException;
+use LooplineSystems\CloseIoApiWrapper\Library\Exception\UrlNotSetException;
 use LooplineSystems\CloseIoApiWrapper\Model\Lead;
 
 class LeadApi extends AbstractApi
@@ -32,18 +33,39 @@ class LeadApi extends AbstractApi
             'get-lead' => '/lead/[:id]/',
             'update-lead' => '/lead/[:id]/',
             'delete-lead' => '/lead/[:id]/',
+            'merge-leads' => '/lead/merge/',
         ];
     }
 
     /**
+     * @param null|int $limit
+     * @param null|int $skip
+     * @param null|array|string $query
+     *
      * @return Lead[]
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
-    public function getAllLeads()
+    public function getAllLeads($limit = null, $skip = null, $query = null)
     {
         /** @var Lead[] $leads */
         $leads = [];
 
-        $apiRequest = $this->prepareRequest('get-leads');
+        $filters = [];
+        if (!empty($limit)) {
+            $filters['_limit'] = $limit;
+        }
+
+        if (!empty($skip)) {
+            $filters['_skip'] = $skip;
+        }
+
+        if (!empty($query)) {
+            $filters['query'] = $query;
+        }
+
+        $apiRequest = $this->prepareRequest('get-leads', null, [], $filters);
 
         $result = $this->triggerGet($apiRequest);
 
@@ -62,6 +84,9 @@ class LeadApi extends AbstractApi
      * @param array $queryParams
      *
      * @return Lead[]
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
     public function findLeads(array $queryParams)
     {
@@ -87,6 +112,9 @@ class LeadApi extends AbstractApi
      * @param string $id
      *
      * @return Lead
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
     public function getLead($id)
     {
@@ -101,6 +129,10 @@ class LeadApi extends AbstractApi
      * @param Lead $lead
      *
      * @return Lead
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
+     * @throws InvalidNewLeadPropertyException
      */
     public function addLead(Lead $lead)
     {
@@ -116,7 +148,9 @@ class LeadApi extends AbstractApi
      * @param Lead $lead
      *
      * @return Lead
+     *
      * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
     public function updateLead(Lead $lead)
     {
@@ -137,6 +171,9 @@ class LeadApi extends AbstractApi
 
     /**
      * @param string $id
+     *
+     * @throws InvalidParamException
+     * @throws UrlNotSetException
      */
     public function deleteLead($id)
     {
@@ -169,7 +206,6 @@ class LeadApi extends AbstractApi
         }
     }
 
-
     /**
      * @param array $params
      *
@@ -184,5 +220,31 @@ class LeadApi extends AbstractApi
         $queryString = implode('&', $flattened);
 
         return $queryString;
+    }
+
+    /**
+     * @param Lead $source the lead to be merged (and deleted)
+     * @param Lead $destination the lead to merge the $source with
+     *
+     * @return CloseIoResponse
+     *
+     * @throws InvalidParamException in case of invalid lead IDs
+     * @throws ResourceNotFoundException in case of merge fail
+     * @throws UrlNotSetException
+     */
+    public function mergeLeads(Lead $source, Lead $destination)
+    {
+        if (empty($source->getId()) or empty($destination->getId())) {
+            throw new InvalidParamException('You need to specify two already existing leads in order to merge them');
+        }
+        $apiRequest = $this->prepareRequest('merge-leads', json_encode([
+            'destination' => $destination->getId(),
+            'source' => $source->getId(),
+        ]));
+        $result = $this->triggerPost($apiRequest);
+        if ($result->getReturnCode() !== 200) {
+            throw new ResourceNotFoundException();
+        }
+        return $result;
     }
 }

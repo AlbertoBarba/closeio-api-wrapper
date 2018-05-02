@@ -2,6 +2,8 @@
 
 namespace LooplineSystems\CloseIoApiWrapper\Model;
 
+use LooplineSystems\CloseIoApiWrapper\Library\Exception\InvalidParamException;
+use LooplineSystems\CloseIoApiWrapper\Library\Exception\UndefinedMethodException;
 use LooplineSystems\CloseIoApiWrapper\Library\JsonSerializableHelperTrait;
 use LooplineSystems\CloseIoApiWrapper\Library\ObjectHydrateHelperTrait;
 
@@ -81,6 +83,9 @@ class Activity implements \JsonSerializable
 
     /**
      * @param array $data
+     *
+     * @throws InvalidParamException
+     * @throws UndefinedMethodException
      */
     public function __construct(array $data = null)
     {
