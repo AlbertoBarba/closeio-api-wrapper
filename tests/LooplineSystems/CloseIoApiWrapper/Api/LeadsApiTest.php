@@ -12,7 +12,9 @@ namespace Tests\LooplineSystems\CloseIoApiWrapper\Api;
 use LooplineSystems\CloseIoApiWrapper\CloseIoApiWrapper;
 use LooplineSystems\CloseIoApiWrapper\CloseIoConfig;
 use LooplineSystems\CloseIoApiWrapper\CloseIoResponse;
+use LooplineSystems\CloseIoApiWrapper\Library\Curl\Curl;
 use LooplineSystems\CloseIoApiWrapper\Model\Lead;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class LeadsApiTest extends \PHPUnit_Framework_TestCase
 {
@@ -122,7 +124,7 @@ class LeadsApiTest extends \PHPUnit_Framework_TestCase
 
         // init expected response
         $expectedResponse = new CloseIoResponse();
-        $expectedResponse->setReturnCode('200');
+        $expectedResponse->setReturnCode(200);
         $expectedResponse->setRawData(json_encode($returnedLead));
         $expectedResponse->setData(json_decode($expectedResponse->getRawData(), true));
 
@@ -148,7 +150,7 @@ class LeadsApiTest extends \PHPUnit_Framework_TestCase
 
         // init expected response
         $expectedResponse = new CloseIoResponse();
-        $expectedResponse->setReturnCode('200');
+        $expectedResponse->setReturnCode(200);
         $expectedResponse->setCurlInfoRaw(['url' => $leadsApi->getApiHandler()->getConfig()->getUrl() . $id]);
 
         // create stub
@@ -172,12 +174,13 @@ class LeadsApiTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return PHPUnit_Framework_MockObject_MockObject|Curl
      * @description Need to be careful of the order, if method() comes after expects() it will return null
      */
     private function getMockResponderCurl($expectedResponse)
     {
         // create stub
+        /** @var PHPUnit_Framework_MockObject_MockObject<Curl> $mockCurl */
         $mockCurl = $this->getMockBuilder('Curl')
             ->setMethods(['getResponse'])
             ->getMock();

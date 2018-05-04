@@ -54,7 +54,7 @@ class ActivityApiTest extends \PHPUnit_Framework_TestCase
 
         // init expected response
         $expectedResponse = new CloseIoResponse();
-        $expectedResponse->setReturnCode('200');
+        $expectedResponse->setReturnCode(200);
         $expectedResponse->setCurlInfoRaw(['url' => $activityApi->getApiHandler()->getConfig()->getUrl() . $id]);
 
         // create stub

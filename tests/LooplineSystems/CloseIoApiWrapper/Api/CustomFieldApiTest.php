@@ -13,7 +13,9 @@ use LooplineSystems\CloseIoApiWrapper\Api\CustomFieldApi;
 use LooplineSystems\CloseIoApiWrapper\CloseIoApiWrapper;
 use LooplineSystems\CloseIoApiWrapper\CloseIoConfig;
 use LooplineSystems\CloseIoApiWrapper\CloseIoResponse;
+use LooplineSystems\CloseIoApiWrapper\Library\Curl\Curl;
 use LooplineSystems\CloseIoApiWrapper\Model\CustomField;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class CustomFieldApiTest extends \PHPUnit_Framework_TestCase
 {
@@ -66,7 +68,7 @@ class CustomFieldApiTest extends \PHPUnit_Framework_TestCase
 
         // init expected response
         $expectedResponse = new CloseIoResponse();
-        $expectedResponse->setReturnCode('200');
+        $expectedResponse->setReturnCode(200);
         $expectedResponse->setRawData(json_encode($returnedCustomField));
         $expectedResponse->setData(json_decode($expectedResponse->getRawData(), true));
 
@@ -95,12 +97,13 @@ class CustomFieldApiTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return PHPUnit_Framework_MockObject_MockObject|Curl
      * @description Need to be careful of the order, if method() comes after expects() it will return null
      */
     private function getMockResponderCurl($expectedResponse)
     {
         // create stub
+        /** @var PHPUnit_Framework_MockObject_MockObject<Curl> $mockCurl */
         $mockCurl = $this->getMockBuilder('Curl')
             ->setMethods(['getResponse'])
             ->getMock();
